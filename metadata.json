@@ -12,6 +12,7 @@
    "3.24"
   ],
   "url": "https://github.com/BlinkBP/walkpaper",
-  "uuid": "walkpaper@blinkbp",
+  "uuid": "walkpaper@walkpaper.blinkbp.github.com",
+  "gettext-domain": "english",
   "version": 2
 }

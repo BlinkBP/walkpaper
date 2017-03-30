@@ -14,7 +14,6 @@ const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const Convenience = Me.imports.convenience;
 
-const WORKSPACE_SCHEMA = 'org.gnome.shell.extensions.walkpaper';
 const WALLPAPER_KEY = 'workspace-wallpapers';
 
 const WalkpaperModel = new GObject.Class({
@@ -59,7 +58,7 @@ const WalkpaperModel = new GObject.Class({
          while (ok)
             ok = this.remove(iter);
         //Adding new rows
-        for ( ; i < newNames.length; i++) {
+        for ( ; i < newPaths.length; i++) {
             iter = this.append();
             this.set(iter, [this.Columns.PATH], [newPaths[i]]);
         }
@@ -75,9 +74,9 @@ const WalkpaperModel = new GObject.Class({
         let index = path.get_indices()[0];
         let paths = this._settings.get_strv(WALLPAPER_KEY);
 
-        if (index >= names.length) {
+        if (index >= paths.length) {
             // fill with blanks
-            for (let i = names.length; i <= index; i++)
+            for (let i = paths.length; i <= index; i++)
                 paths[i] = '';
         }
 
@@ -162,14 +161,6 @@ const WalkpaperSettingsWidget = new GObject.Class({
 
         scrolled.add(this._treeView);
     },
-
-    _nameEdited: function(renderer, path, new_text) {
-        let [ok, iter] = this._store.get_iter_from_string(path);
-
-        if (ok)
-            this._store.set(iter, [this._store.Columns.LABEL], [new_text]);
-    },
-
     _pathEdited: function(renderer, path, new_text) {
         let [ok, iter] = this._store.get_iter_from_string(path);
 

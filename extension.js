@@ -6,13 +6,12 @@ const Meta = imports.gi.Meta
 const Mainloop = imports.mainloop;
 const Main = imports.ui.main;
 
-const WORKSPACE_SCHEMA = 'org.gnome.desktop.wm.preferences';
 const WALLPAPER_KEY = 'workspace-wallpapers';
 const BACKGROUND_SCHEMA = 'org.gnome.desktop.background'
 const CURRENT_WALLPAPER_KEY = 'picture-uri'
 
 function _changeWallpaper() {
-    let pathSettings = new Gio.Settings({ schema_id: WORKSPACE_SCHEMA });
+    let pathSettings = Convenience.getSettings();
     let paths = pathSettings.get_strv(WALLPAPER_KEY);
     let backgroundSettings = new Gio.Settings({ schema_id: BACKGROUND_SCHEMA });
     let index = global.screen.get_active_workspace_index();
