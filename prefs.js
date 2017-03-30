@@ -1,5 +1,4 @@
 // -*- mode: js2; indent-tabs-mode: nil; js2-basic-offset: 4 -*-
-
 const Gio = imports.gi.Gio;
 const GLib = imports.gi.GLib;
 const GObject = imports.gi.GObject;
@@ -14,6 +13,7 @@ const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const Convenience = Me.imports.convenience;
 
+const WORKSPACE_COUNT_KEY = 'workspace-count';
 const WALLPAPER_KEY = 'workspace-wallpapers';
 
 const WalkpaperModel = new GObject.Class({
@@ -36,8 +36,6 @@ const WalkpaperModel = new GObject.Class({
         // overriding class closure doesn't work, because GtkTreeModel
         // plays tricks with marshallers and class closures
         this.connect('row-changed', Lang.bind(this, this._onRowChanged));
-        this.connect('row-inserted', Lang.bind(this, this._onRowInserted));
-        this.connect('row-deleted', Lang.bind(this, this._onRowDeleted));
     },
 
     _reloadFromSettings: function() {
@@ -45,11 +43,15 @@ const WalkpaperModel = new GObject.Class({
             return;
         this._preventChanges = true;
 
+        let workspaceNum = this._settings.get_int(WORKSPACE_COUNT_KEY);
         let newPaths = this._settings.get_strv(WALLPAPER_KEY);
+
+        for (i = newPaths.length; i < workspaceNum; i++)
+          newPaths[i] = '';
 
         let i = 0;
         let [ok, iter] = this.get_iter_first();
-        while (ok && i < newPaths.length) {
+        while (ok && i < workspaceNum) {
             this.set(iter, [this.Columns.PATH], [newPaths[i]]);
             ok = this.iter_next(iter);
             i++;
@@ -58,7 +60,7 @@ const WalkpaperModel = new GObject.Class({
          while (ok)
             ok = this.remove(iter);
         //Adding new rows
-        for ( ; i < newPaths.length; i++) {
+        for ( ; i < workspaceNum; i++) {
             iter = this.append();
             this.set(iter, [this.Columns.PATH], [newPaths[i]]);
         }
@@ -72,6 +74,7 @@ const WalkpaperModel = new GObject.Class({
         this._preventChanges = true;
 
         let index = path.get_indices()[0];
+        //let index = this._settings.get_int(WORKSPACE_COUNT_KEY);
         let paths = this._settings.get_strv(WALLPAPER_KEY);
 
         if (index >= paths.length) {
@@ -81,43 +84,6 @@ const WalkpaperModel = new GObject.Class({
         }
 
         paths[index] = this.get_value(iter, this.Columns.PATH);
-
-        this._settings.set_strv(WALLPAPER_KEY, paths);
-
-        this._preventChanges = false;
-    },
-
-    _onRowInserted: function(self, path, iter) {
-        if (this._preventChanges)
-            return;
-        this._preventChanges = true;
-
-        let index = path.get_indices()[0];
-        let paths = this._settings.get_strv(WALLPAPER_KEY);
-        let pathValue = this.get_value(iter, this.Columns.PATH) || '';
-        paths.splice(index, 0, pathValue);
-
-        this._settings.set_strv(WALLPAPER_KEY, paths);
-
-        this._preventChanges = false;
-    },
-
-    _onRowDeleted: function(self, path) {
-        if (this._preventChanges)
-            return;
-        this._preventChanges = true;
-
-        let index = path.get_indices()[0];
-        let paths = this._settings.get_strv(WALLPAPER_KEY);
-
-        if (index >= paths.length)
-            return;
-
-        paths.splice(index, 1);
-
-        // compact the array
-        for (let i = paths.length - 1; i >= 0 && !paths[i]; i++)
-            paths.pop();
 
         this._settings.set_strv(WALLPAPER_KEY, paths);
 
