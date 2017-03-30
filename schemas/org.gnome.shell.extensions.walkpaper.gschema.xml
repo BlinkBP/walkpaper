@@ -6,10 +6,10 @@
       <summary>Paths to each workspace's wallpaper.</summary>
       <description>Path to wallpaper which should be set on a corresponding workspace.</description>
     </key>
-    <!-- <key name="workspace-names" type="as">
-      <default>[]</default>
-      <summary>Workspace names.</summary>
-      <description>If not empty, it contains each workspace's name.</description>
-    </key> -->
+    <key name="workspace-count" type="i">
+      <default>1</default>
+      <summary>Workspace count.</summary>
+      <description>Number of workspaces present.</description>
+    </key>
   </schema>
 </schemalist>
