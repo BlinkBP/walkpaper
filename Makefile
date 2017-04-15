@@ -7,9 +7,10 @@ JS_FILES = {extension,convenience,prefs}.js
 all: walkpaper.zip
 
 schemas:
-	glib-compile-schemas --strict --targetdir=./schemas/ ./schemas
+	mkdir schemas
+	glib-compile-schemas --strict --targetdir=./schemas/ .
 
-hidetopbar.zip: schemas
+walkpaper.zip: schemas
 	zip walkpaper.zip -r $(JS_FILES) metadata.json locale/*/*/*.mo schemas
 
 clean:

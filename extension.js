@@ -16,30 +16,40 @@ const BACKGROUND_SCHEMA = 'org.gnome.desktop.background';
 const CURRENT_WALLPAPER_KEY = 'picture-uri';
 
 function _changeWallpaper() {
-    let pathSettings = Convenience.getSettings();
-    let paths = pathSettings.get_strv(WALLPAPER_KEY);
-    let backgroundSettings = new Gio.Settings({ schema_id: BACKGROUND_SCHEMA });
-    let index = global.screen.get_active_workspace_index();
-    let wallpaper = 'file://'.concat(paths[index]);
-    backgroundSettings.set_string(CURRENT_WALLPAPER_KEY, wallpaper);
+  let pathSettings = Convenience.getSettings();
+  let paths = pathSettings.get_strv(WALLPAPER_KEY);
+  let backgroundSettings = new Gio.Settings({ schema_id: BACKGROUND_SCHEMA });
+  let index = global.screen.get_active_workspace_index();
+  let wallpaper = 'file://'.concat(paths[index]);
+  backgroundSettings.set_string(CURRENT_WALLPAPER_KEY, wallpaper);
+}
+
+function _workspaceNumChanged() {
+  let workspaceNum = Meta.prefs_get_num_workspaces();
+  let pathSettings = Convenience.getSettings();
+  pathSettings.set_int(WORKSPACE_COUNT_KEY, workspaceNum);
 }
 
 function init(metadata) {
-  let workspaceCount = Meta.prefs_get_num_workspaces();
-  let pathSettings = Convenience.getSettings();
-  pathSettings.set_int(WORKSPACE_COUNT_KEY, workspaceCount);
   log("Walkpaper initiated.")
 }
 
-let signalId;
+let wSwitchedSignalId;
+let wAddedSignalId;
+let wRemovedSignalId;
 
 function enable() {
-    signalId = global.screen.connect('workspace-switched', _changeWallpaper);
+  _workspaceNumChanged();
+  wSwitchedSignalId = global.screen.connect('workspace-switched', _changeWallpaper);
+  wAddedSignalId = global.screen.connect('workspace-added', _workspaceNumChanged);
+  wRemovedSignalId = global.screen.connect('workspace-removed', _workspaceNumChanged);
 }
 
 function disable() {
-    if (signalId) {
-	     global.screen.disconnect(signalId);
-	     signalId = 0;
-    }
+  if (signalId) {
+     global.screen.disconnect(wSwitchedSignalId);
+     global.screen.disconnect(wAddedSignalId);
+     global.screen.disconnect(wRemovedSignalId);
+     signalId = 0;
+  }
 }
