@@ -11,7 +11,7 @@ schemas:
 	glib-compile-schemas --strict --targetdir=./schemas/ .
 
 walkpaper.zip: schemas
-	zip walkpaper.zip -r $(JS_FILES) metadata.json locale/*/*/*.mo schemas
+	zip walkpaper.zip -r $(JS_FILES) metadata.json schemas
 
 clean:
 	rm -rf walkpaper.zip schemas
