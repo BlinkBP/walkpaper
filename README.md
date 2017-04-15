@@ -1,9 +1,9 @@
-##About:
+## About:
 
-#Walkpaper
+# Walkpaper
 Have different wallpaper on each workspace.
 
-##Installation:
+## Installation:
 
 Compile the gsettings schema by running
 ```
@@ -17,6 +17,6 @@ Install this in your extensions directory
 
 You can also manage extensions from https://extensions.gnome.org/local/
 
-##License:
+## License:
 
 This project is licensed under the GNU License - see the [LICENSE.md](LICENSE.md) file for details
