@@ -1,4 +1,3 @@
-// -*- mode: js2; indent-tabs-mode: nil; js2-basic-offset: 4 -*-
 const Gio = imports.gi.Gio;
 const GLib = imports.gi.GLib;
 const GObject = imports.gi.GObject;
@@ -46,8 +45,8 @@ const WalkpaperModel = new GObject.Class({
         let workspaceNum = this._settings.get_int(WORKSPACE_COUNT_KEY);
         let newPaths = this._settings.get_strv(WALLPAPER_KEY);
 
-        for (i = newPaths.length; i < workspaceNum; i++)
-          newPaths[i] = '';
+        for (let i = newPaths.length; i < workspaceNum; i++)
+            newPaths[i] = '';
 
         let i = 0;
         let [ok, iter] = this.get_iter_first();

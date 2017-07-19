@@ -1,18 +1,14 @@
 # Walkpaper
 
 ## About:
-Have different wallpaper on each workspace.
+Have a different wallpaper on each workspace.
 
 ## Installation:
-Compile the gsettings schema by running
+Compile the extension by running
 ```
-    make schemas
+    # make all
 ```
-Install this in your extensions directory
-```
-    ~/.local/share/gnome-shell/extensions/
-```
- and restart GNOME Shell (alt+F2 + 'r')
+Install `walkpaper.zip` using Tweak Tool and restart GNOME Shell (alt+F2 + 'r')
 
 You can also manage extensions from https://extensions.gnome.org/local/
 
