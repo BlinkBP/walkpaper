@@ -15,12 +15,22 @@ const WALLPAPER_KEY = 'workspace-wallpapers';
 const BACKGROUND_SCHEMA = 'org.gnome.desktop.background';
 const CURRENT_WALLPAPER_KEY = 'picture-uri';
 
+let index = global.screen.get_active_workspace_index();
+
 function _changeWallpaper() {
   let pathSettings = Convenience.getSettings();
   let paths = pathSettings.get_strv(WALLPAPER_KEY);
   let backgroundSettings = new Gio.Settings({ schema_id: BACKGROUND_SCHEMA });
-  let index = global.screen.get_active_workspace_index();
-  let wallpaper = 'file://'.concat(paths[index]);
+
+  // Save wallpaper for previous WS if changed.
+  let wallpaper = backgroundSettings.get_string(CURRENT_WALLPAPER_KEY);
+  if (wallpaper != paths[index]) {
+    paths[index] = wallpaper;
+    pathSettings.set_strv(WALLPAPER_KEY, paths);
+  }
+
+  index = global.screen.get_active_workspace_index();
+  let wallpaper = paths[index];
   backgroundSettings.set_string(CURRENT_WALLPAPER_KEY, wallpaper);
 }
 
