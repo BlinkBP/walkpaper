@@ -31,6 +31,9 @@ function _changeWallpaper() {
 
   index = global.screen.get_active_workspace_index();
   let wallpaper = paths[index];
+  if ((typeof wallpaper === "undefined") || (wallpaper == "")) {
+    wallpaper = paths[0];
+  }
   backgroundSettings.set_string(CURRENT_WALLPAPER_KEY, wallpaper);
 }
 
