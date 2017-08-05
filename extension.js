@@ -17,10 +17,17 @@ const CURRENT_WALLPAPER_KEY = 'picture-uri';
 
 let index = global.screen.get_active_workspace_index();
 
+function debugLog(s) {
+  // log(s);
+}
+
 function _changeWallpaper() {
+
   let pathSettings = Convenience.getSettings();
   let paths = pathSettings.get_strv(WALLPAPER_KEY);
   let backgroundSettings = new Gio.Settings({ schema_id: BACKGROUND_SCHEMA });
+
+  debugLog("Walkpaper change from " + index);
 
   // Save wallpaper for previous WS if changed.
   let wallpaper = backgroundSettings.get_string(CURRENT_WALLPAPER_KEY);
@@ -30,10 +37,13 @@ function _changeWallpaper() {
   }
 
   index = global.screen.get_active_workspace_index();
+  debugLog("Walkpaper change to " + index);
+
   let wallpaper = paths[index];
   if ((typeof wallpaper === "undefined") || (wallpaper == "")) {
     wallpaper = paths[0];
   }
+  debugLog("wallpaper is " + wallpaper);
   backgroundSettings.set_string(CURRENT_WALLPAPER_KEY, wallpaper);
 }
 
@@ -44,8 +54,9 @@ function _workspaceNumChanged() {
 }
 
 let signalId;
+
 function init(metadata) {
-  log("Walkpaper initiated.")
+  log("Walkpaper init");
   signalId = 0;
 }
 
@@ -54,6 +65,7 @@ let wAddedSignalId;
 let wRemovedSignalId;
 
 function enable() {
+  log("Walkpaper enable");
   _workspaceNumChanged();
   wSwitchedSignalId = global.screen.connect('workspace-switched', _changeWallpaper);
   wAddedSignalId = global.screen.connect('workspace-added', _workspaceNumChanged);
@@ -62,6 +74,7 @@ function enable() {
 }
 
 function disable() {
+  log("Walkpaper disable");
   if (signalId) {
      global.screen.disconnect(wSwitchedSignalId);
      global.screen.disconnect(wAddedSignalId);
