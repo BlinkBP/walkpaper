@@ -25,7 +25,7 @@ function _changeWallpaper() {
   // Save wallpaper for previous WS if changed.
   let wallpaper = backgroundSettings.get_string(CURRENT_WALLPAPER_KEY);
   if (wallpaper != paths[index]) {
-    paths[prevWsIndex] = wallpaper;
+    paths[index] = wallpaper;
     pathSettings.set_strv(WALLPAPER_KEY, paths);
   }
 
