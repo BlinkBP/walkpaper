@@ -40,8 +40,10 @@ function _workspaceNumChanged() {
   pathSettings.set_int(WORKSPACE_COUNT_KEY, workspaceNum);
 }
 
+let signalId;
 function init(metadata) {
   log("Walkpaper initiated.")
+  signalId = 0;
 }
 
 let wSwitchedSignalId;
@@ -53,6 +55,7 @@ function enable() {
   wSwitchedSignalId = global.screen.connect('workspace-switched', _changeWallpaper);
   wAddedSignalId = global.screen.connect('workspace-added', _workspaceNumChanged);
   wRemovedSignalId = global.screen.connect('workspace-removed', _workspaceNumChanged);
+  signalId = 1;
 }
 
 function disable() {
