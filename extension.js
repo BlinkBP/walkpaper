@@ -26,23 +26,29 @@ function _changeWallpaper() {
   let paths = pathSettings.get_strv(WALLPAPER_KEY);
   let backgroundSettings = new Gio.Settings({ schema_id: BACKGROUND_SCHEMA });
 
-  debugLog("Walkpaper change from " + index);
+  debugLog("Walkpaper change from WS " + index);
 
   // Save wallpaper for previous WS if changed.
   let wallpaper = backgroundSettings.get_string(CURRENT_WALLPAPER_KEY);
-  if (wallpaper != paths[index]) {
-    paths[index] = wallpaper;
-    pathSettings.set_strv(WALLPAPER_KEY, paths);
-  }
 
+  paths[index] = wallpaper;
+  for (let i=0; i < index; i++) {
+    // Fill in empty entries up to to current, otherwise set_strv fails
+    if (typeof paths[i] === "undefined") {
+      paths[i] = wallpaper;
+    }
+  }
+  pathSettings.set_strv(WALLPAPER_KEY, paths);
+
+  // Now get wallpaper for current workspace
   index = global.screen.get_active_workspace_index();
-  debugLog("Walkpaper change to " + index);
+  debugLog("Walkpaper change WS to " + index);
 
   let wallpaper = paths[index];
   if ((typeof wallpaper === "undefined") || (wallpaper == "")) {
-    wallpaper = paths[0];
+    wallpaper = paths[0];  // Default
   }
-  debugLog("wallpaper is " + wallpaper);
+  debugLog("Walkpaper: " + wallpaper);
   backgroundSettings.set_string(CURRENT_WALLPAPER_KEY, wallpaper);
 }
 
