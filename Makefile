@@ -1,6 +1,6 @@
 SHELL := /bin/bash
 
-JS_FILES = extension.js convenience.js prefs.js
+JS_FILES = extension.js convenience.js
 
 .PHONY: clean all
 

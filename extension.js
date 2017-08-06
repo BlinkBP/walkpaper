@@ -10,7 +10,6 @@ const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const Convenience = Me.imports.convenience;
 
-const WORKSPACE_COUNT_KEY = 'workspace-count';
 const WALLPAPER_KEY = 'workspace-wallpapers';
 const BACKGROUND_SCHEMA = 'org.gnome.desktop.background';
 const CURRENT_WALLPAPER_KEY = 'picture-uri';
@@ -47,38 +46,18 @@ function _changeWallpaper() {
   backgroundSettings.set_string(CURRENT_WALLPAPER_KEY, wallpaper);
 }
 
-function _workspaceNumChanged() {
-  let workspaceNum = Meta.prefs_get_num_workspaces();
-  let pathSettings = Convenience.getSettings();
-  pathSettings.set_int(WORKSPACE_COUNT_KEY, workspaceNum);
-}
-
-let signalId;
-
 function init(metadata) {
   log("Walkpaper init");
-  signalId = 0;
 }
 
 let wSwitchedSignalId;
-let wAddedSignalId;
-let wRemovedSignalId;
 
 function enable() {
   log("Walkpaper enable");
-  _workspaceNumChanged();
   wSwitchedSignalId = global.screen.connect('workspace-switched', _changeWallpaper);
-  wAddedSignalId = global.screen.connect('workspace-added', _workspaceNumChanged);
-  wRemovedSignalId = global.screen.connect('workspace-removed', _workspaceNumChanged);
-  signalId = 1;
 }
 
 function disable() {
   log("Walkpaper disable");
-  if (signalId) {
-     global.screen.disconnect(wSwitchedSignalId);
-     global.screen.disconnect(wAddedSignalId);
-     global.screen.disconnect(wRemovedSignalId);
-     signalId = 0;
-  }
+  global.screen.disconnect(wSwitchedSignalId);
 }
