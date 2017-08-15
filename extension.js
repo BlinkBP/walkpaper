@@ -1,5 +1,3 @@
-// -*- mode: js2; indent-tabs-mode: nil; js2-basic-offset: 4 -*-
-// Sample extension code, makes clicking on the panel show a message
 const Gio = imports.gi.Gio;
 const St = imports.gi.St;
 const Meta = imports.gi.Meta;
@@ -15,7 +13,7 @@ const WALLPAPER_KEY = 'workspace-wallpapers';
 const BACKGROUND_SCHEMA = 'org.gnome.desktop.background';
 const CURRENT_WALLPAPER_KEY = 'picture-uri';
 
-let index = global.screen.get_active_workspace_index();
+let index = global.screen.get_active_workspace_index(); //initialized here then updated in _changeWallpaper()
 
 function debugLog(s) {
   // log(s);
@@ -33,8 +31,9 @@ function _changeWallpaper() {
   let wallpaper = backgroundSettings.get_string(CURRENT_WALLPAPER_KEY);
 
   paths[index] = wallpaper;
+
+  // Fill in empty entries up to to current, otherwise set_strv fails
   for (let i=0; i < index; i++) {
-    // Fill in empty entries up to to current, otherwise set_strv fails
     if (typeof paths[i] === "undefined") {
       paths[i] = wallpaper;
     }
@@ -45,11 +44,11 @@ function _changeWallpaper() {
   index = global.screen.get_active_workspace_index();
   debugLog("Walkpaper change WS to " + index);
 
-  let wallpaper = paths[index];
+  wallpaper = paths[index];
   if ((typeof wallpaper === "undefined") || (wallpaper == "")) {
     wallpaper = paths[0];  // Default
   }
-  debugLog("Walkpaper: " + wallpaper);
+  debugLog("Walkpaper set wallpaper to  " + wallpaper);
   backgroundSettings.set_string(CURRENT_WALLPAPER_KEY, wallpaper);
 }
 
@@ -59,11 +58,8 @@ function _workspaceNumChanged() {
   pathSettings.set_int(WORKSPACE_COUNT_KEY, workspaceNum);
 }
 
-let signalId;
-
 function init(metadata) {
   log("Walkpaper init");
-  signalId = 0;
 }
 
 let wSwitchedSignalId;
@@ -76,15 +72,11 @@ function enable() {
   wSwitchedSignalId = global.screen.connect('workspace-switched', _changeWallpaper);
   wAddedSignalId = global.screen.connect('workspace-added', _workspaceNumChanged);
   wRemovedSignalId = global.screen.connect('workspace-removed', _workspaceNumChanged);
-  signalId = 1;
 }
 
 function disable() {
   log("Walkpaper disable");
-  if (signalId) {
-     global.screen.disconnect(wSwitchedSignalId);
-     global.screen.disconnect(wAddedSignalId);
-     global.screen.disconnect(wRemovedSignalId);
-     signalId = 0;
-  }
+  global.screen.disconnect(wSwitchedSignalId);
+  global.screen.disconnect(wAddedSignalId);
+  global.screen.disconnect(wRemovedSignalId);
 }
