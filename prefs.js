@@ -124,20 +124,55 @@ const WalkpaperSettingsWidget = new GObject.Class({
 
         //Workspace wallpapers paths
         let columnPaths = new Gtk.TreeViewColumn({ title: _("Path to wallpaper") });
-        let rendererPaths = new Gtk.CellRendererText({ editable: true });
-        rendererPaths.connect('edited', Lang.bind(this, this._pathEdited));
+        let rendererPaths = new Gtk.CellRendererText({ editable: false });
         columnPaths.pack_start(rendererPaths, true);
         columnPaths.add_attribute(rendererPaths, 'text', this._store.Columns.PATH);
         this._treeView.append_column(columnPaths);
 
+        this._treeView.connect('row-activated', Lang.bind(this, this._editPath));
+
         scrolled.add(this._treeView);
     },
-    _pathEdited: function(renderer, path, new_text) {
-        let [ok, iter] = this._store.get_iter_from_string(path);
+    _editPath: function(renderer, path, data) {
+        let chooser = new Gtk.FileChooserDialog({
+            action: Gtk.FileChooserAction.OPEN,
+            select_multiple: false,
+            transient_for: renderer.get_toplevel(),
+            title: 'Select Wallpaper'
+        });
+        //Without setting a current folder folders won't show their content
+        chooser.set_current_folder(GLib.get_home_dir());
 
-        if (ok)
-            this._store.set(iter, [this._store.Columns.PATH], [new_text]);
+        let filter = new Gtk.FileFilter();
+        filter.set_name("Wallpapers");
+        filter.add_pattern("*.png");
+        filter.add_pattern("*.jpg");
+        filter.add_pattern("*.jpeg");
+        filter.add_pattern("*.tga");
+        chooser.add_filter(filter);
+
+        chooser.add_button('Cancel', Gtk.ResponseType.CANCEL);
+        chooser.add_button('OK', Gtk.ResponseType.OK);
+
+        let result = chooser.run();
+        if (result === Gtk.ResponseType.OK) {
+            let filename = "file://" + chooser.get_filename();
+            let [ok, iter] = this._store.get_iter(path);
+            if (ok) {
+                this._store.set(iter, [this._store.Columns.PATH], [filename]);
+                //We change the wallpaper immediately because workspace change
+                //triggers wallpaper save
+                this.changeWallpaper(filename);
+            }
+        }
+        chooser.destroy()
     },
+    changeWallpaper: function(wallpaper) {
+      const BACKGROUND_SCHEMA = 'org.gnome.desktop.background';
+      const CURRENT_WALLPAPER_KEY = 'picture-uri';
+      let backgroundSettings = new Gio.Settings({ schema_id: BACKGROUND_SCHEMA });
+      backgroundSettings.set_string(CURRENT_WALLPAPER_KEY, wallpaper);
+    }
 });
 
 function init() {
