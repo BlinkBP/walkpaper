@@ -21,7 +21,8 @@ const WalkpaperModel = new GObject.Class({
     Extends: Gtk.ListStore,
 
     Columns: {
-        PATH: 0,
+        NUMBER: 0,
+        PATH: 1,
     },
 
     _init: function(params) {
@@ -32,8 +33,6 @@ const WalkpaperModel = new GObject.Class({
 
         this._reloadFromSettings();
 
-        // overriding class closure doesn't work, because GtkTreeModel
-        // plays tricks with marshallers and class closures
         this.connect('row-changed', Lang.bind(this, this._onRowChanged));
     },
 
@@ -45,13 +44,15 @@ const WalkpaperModel = new GObject.Class({
         let workspaceNum = this._settings.get_int(WORKSPACE_COUNT_KEY);
         let newPaths = this._settings.get_strv(WALLPAPER_KEY);
 
-        for (let i = newPaths.length; i < workspaceNum; i++)
+        for (let i = newPaths.length; i < workspaceNum; i++) {
             newPaths[i] = '';
+        }
 
         let i = 0;
         let [ok, iter] = this.get_iter_first();
         while (ok && i < workspaceNum) {
             this.set(iter, [this.Columns.PATH], [newPaths[i]]);
+            this.set(iter, [this.Columns.NUMBER], [parseInt(i+1)]);
             ok = this.iter_next(iter);
             i++;
         }
@@ -62,6 +63,7 @@ const WalkpaperModel = new GObject.Class({
         for ( ; i < workspaceNum; i++) {
             iter = this.append();
             this.set(iter, [this.Columns.PATH], [newPaths[i]]);
+            this.set(iter, [this.Columns.NUMBER], [parseInt(i+1)]);
         }
 
         this._preventChanges = false;
@@ -99,10 +101,6 @@ const WalkpaperSettingsWidget = new GObject.Class({
         this.parent(params);
         this.margin = 12;
         this.orientation = Gtk.Orientation.VERTICAL;
-//TODO add new label Paths
-        this.add(new Gtk.Label({ label: '<b>' + _("Workspace Names") + '</b>',
-                                 use_markup: true, margin_bottom: 6,
-                                 hexpand: true, halign: Gtk.Align.START }));
 
         let scrolled = new Gtk.ScrolledWindow({ shadow_type: Gtk.ShadowType.IN });
         scrolled.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC);
@@ -117,7 +115,15 @@ const WalkpaperSettingsWidget = new GObject.Class({
                                             vexpand: true
                                           });
 
-        let columnPaths = new Gtk.TreeViewColumn({ title: _("Path") });
+        //Workspace number
+        let columnNumbers = new Gtk.TreeViewColumn({ title: _("Workspace") });
+        let rendererNumbers = new Gtk.CellRendererText({ editable: false });
+        columnNumbers.pack_start(rendererNumbers, true);
+        columnNumbers.add_attribute(rendererNumbers, 'text', this._store.Columns.NUMBER);
+        this._treeView.append_column(columnNumbers);
+
+        //Workspace wallpapers paths
+        let columnPaths = new Gtk.TreeViewColumn({ title: _("Path to wallpaper") });
         let rendererPaths = new Gtk.CellRendererText({ editable: true });
         rendererPaths.connect('edited', Lang.bind(this, this._pathEdited));
         columnPaths.pack_start(rendererPaths, true);
