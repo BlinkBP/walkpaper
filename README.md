@@ -12,7 +12,7 @@ Install `walkpaper.zip` using Tweak Tool and restart GNOME Shell (alt+F2 + 'r').
 
 At this point you have two options:
 
-You can either open extension's preferences and set paths to each workspace's wallpaper or use the default wallpaper changing method in GNOME settings.
+You can either open extension's preferences and set paths to each workspace's wallpaper by double clicking on a specific row or use the default wallpaper changing method in GNOME settings.
 
 More about the second method:
 
