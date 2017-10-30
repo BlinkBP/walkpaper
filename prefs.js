@@ -2,6 +2,8 @@ const Gio = imports.gi.Gio;
 const GLib = imports.gi.GLib;
 const GObject = imports.gi.GObject;
 const Gtk = imports.gi.Gtk;
+const Gdk = imports.gi.Gdk;
+const GdkPixbuf = imports.gi.GdkPixbuf;
 const Lang = imports.lang;
 
 const Gettext = imports.gettext.domain('gnome-shell-extensions');
@@ -122,6 +124,14 @@ const WalkpaperSettingsWidget = new GObject.Class({
         columnNumbers.add_attribute(rendererNumbers, 'text', this._store.Columns.NUMBER);
         this._treeView.append_column(columnNumbers);
 
+        //Preview picture
+        let columnImages = new Gtk.TreeViewColumn({title: "Preview" });
+        let rendererImages = new Gtk.CellRendererPixbuf();
+        rendererImages.set_fixed_size(240, 120);
+        columnImages.pack_start(rendererImages, true);
+        columnImages.set_cell_data_func(rendererImages, this.getCellPreviewPixbuf)
+        this._treeView.append_column(columnImages);
+
         //Workspace wallpapers paths
         let columnPaths = new Gtk.TreeViewColumn({ title: _("Path to wallpaper") });
         let rendererPaths = new Gtk.CellRendererText({ editable: false });
@@ -172,6 +182,17 @@ const WalkpaperSettingsWidget = new GObject.Class({
       const CURRENT_WALLPAPER_KEY = 'picture-uri';
       let backgroundSettings = new Gio.Settings({ schema_id: BACKGROUND_SCHEMA });
       backgroundSettings.set_string(CURRENT_WALLPAPER_KEY, wallpaper);
+    },
+    getCellPreviewPixbuf: function(col, cell, model, iter, user_data) {
+      let path = model.get_value(iter, [model.Columns.PATH]).replace(/file:\/\//, "");
+      let pixbuf = GdkPixbuf.Pixbuf.new_from_file(path);
+      let width = 240;
+      let ratio = pixbuf.get_width() / width;
+      let height = pixbuf.get_height() / ratio;
+      //Creating new pixbuf since Gdk.INTERP_BILINEAR is not working
+      //thus unable to use scale function
+      pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(path, width, height);
+      cell.set_property('pixbuf', pixbuf);
     }
 });
 
