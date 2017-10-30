@@ -15,6 +15,7 @@ const Me = ExtensionUtils.getCurrentExtension();
 const Convenience = Me.imports.convenience;
 
 const WORKSPACE_COUNT_KEY = 'workspace-count';
+const WORKSPACE_INDEX = 'workspace-index';
 const WALLPAPER_KEY = 'workspace-wallpapers';
 
 const WalkpaperModel = new GObject.Class({
@@ -170,9 +171,14 @@ const WalkpaperSettingsWidget = new GObject.Class({
             let [ok, iter] = this._store.get_iter(path);
             if (ok) {
                 this._store.set(iter, [this._store.Columns.PATH], [filename]);
-                //We change the wallpaper immediately because workspace change
-                //triggers wallpaper save
-                this.changeWallpaper(filename);
+                //Check if we changed current wallpaper
+                let _settings = Convenience.getSettings();
+                let index = _settings.get_int(WORKSPACE_INDEX);
+                if (this._store.get_string_from_iter(iter) == '' + index) {
+                  //We change the wallpaper immediately because workspace change
+                  //triggers wallpaper save
+                  this.changeWallpaper(filename);
+                }
             }
         }
         chooser.destroy()
