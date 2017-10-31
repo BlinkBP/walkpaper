@@ -1,8 +1,6 @@
 const Gio = imports.gi.Gio;
 const St = imports.gi.St;
 const Meta = imports.gi.Meta;
-const Mainloop = imports.mainloop;
-const Main = imports.ui.main;
 
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
