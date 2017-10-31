@@ -1,5 +1,4 @@
 const Gio = imports.gi.Gio;
-const St = imports.gi.St;
 const Meta = imports.gi.Meta;
 
 const ExtensionUtils = imports.misc.extensionUtils;
