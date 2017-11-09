@@ -73,7 +73,7 @@ function enable() {
   log("Walkpaper enable");
   _workspaceNumChanged();
   wSwitchedSignalId[0] = global.screen.connect('workspace-switched', _changeWallpaper);
-  wSwitchedSidnalId[1] = global.screen.connect('workspace-switched', _changeIndex);
+  wSwitchedSignalId[1] = global.screen.connect('workspace-switched', _changeIndex);
   wAddedSignalId = global.screen.connect('workspace-added', _workspaceNumChanged);
   wRemovedSignalId = global.screen.connect('workspace-removed', _workspaceNumChanged);
 }
