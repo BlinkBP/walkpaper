@@ -28,11 +28,18 @@ const WalkpaperModel = new GObject.Class({
         PATH: 1,
     },
 
+    Thumbnails: [],
+
     _init: function(params) {
         this.parent(params);
         this.set_column_types([GObject.TYPE_STRING, GObject.TYPE_STRING]);
 
         this._settings = Convenience.getSettings();
+
+        let workspaceNum = this._settings.get_int(WORKSPACE_COUNT_KEY);
+        for (let i = 0; i < workspaceNum; i++) {
+          this.Thumbnails.push(null);
+        }
 
         this._reloadFromSettings();
 
@@ -179,6 +186,9 @@ const WalkpaperSettingsWidget = new GObject.Class({
                   //triggers wallpaper save
                   this.changeWallpaper(filename);
                 }
+                //Invalidate thumbnail so it is recreated
+                let thumb_index = parseInt(this._store.get_string_from_iter(iter)) + 1;
+                this._store.Thumbnails[thumb_index] = GdkPixbuf.Pixbuf.new_from_file_at_scale(filename.replace(/file:\/\//, ""), 240, 160, true);
             }
         }
         chooser.destroy()
@@ -190,15 +200,14 @@ const WalkpaperSettingsWidget = new GObject.Class({
       backgroundSettings.set_string(CURRENT_WALLPAPER_KEY, wallpaper);
     },
     getCellPreviewPixbuf: function(col, cell, model, iter, user_data) {
-      let path = model.get_value(iter, [model.Columns.PATH]).replace(/file:\/\//, "");
-      let pixbuf = GdkPixbuf.Pixbuf.new_from_file(path);
-      let width = 240;
-      let ratio = pixbuf.get_width() / width;
-      let height = pixbuf.get_height() / ratio;
-      //Creating new pixbuf since Gdk.INTERP_BILINEAR is not working
-      //thus unable to use scale function
-      pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(path, width, height);
-      cell.set_property('pixbuf', pixbuf);
+      let index = model.get_value(iter, [model.Columns.NUMBER]);
+
+      if (model.Thumbnails[index] == null) {
+        let path = model.get_value(iter, [model.Columns.PATH]).replace(/file:\/\//, "");
+        model.Thumbnails[index] = GdkPixbuf.Pixbuf.new_from_file_at_scale(path, 240, 160, true);
+      }
+
+      cell.set_property('pixbuf', model.Thumbnails[index]);
     }
 });
 
