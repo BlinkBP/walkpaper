@@ -9,10 +9,14 @@
    "3.18",
    "3.20",
    "3.22",
-   "3.24"
+   "3.24",
+   "3.26", 
+   "3.28",
+   "3.30",
+   "3.32"
   ],
   "url": "https://github.com/BlinkBP/walkpaper",
   "uuid": "walkpaper@walkpaper.blinkbp.github.com",
   "gettext-domain": "english",
-  "version": 4
+  "version": 5
 }
