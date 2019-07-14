@@ -11,7 +11,7 @@ const WALLPAPER_KEY = 'workspace-wallpapers';
 const BACKGROUND_SCHEMA = 'org.gnome.desktop.background';
 const CURRENT_WALLPAPER_KEY = 'picture-uri';
 
-let index = global.screen.get_active_workspace_index(); //initialized here then updated in _changeWallpaper()
+let index = global.workspace_manager.get_active_workspace_index(); //initialized here then updated in _changeWallpaper()
 
 function debugLog(s) {
   // log(s);
@@ -39,7 +39,7 @@ function _changeWallpaper() {
   pathSettings.set_strv(WALLPAPER_KEY, paths);
 
   // Now get wallpaper for current workspace
-  index = global.screen.get_active_workspace_index();
+  index = global.workspace_manager.get_active_workspace_index();
   debugLog("Walkpaper change WS to " + index);
 
   wallpaper = paths[index];
@@ -51,8 +51,9 @@ function _changeWallpaper() {
 }
 
 function _changeIndex() {
-  let index = global.screen.get_active_workspace_index();
-  backgroundSettings.set_string(WORKSPACE_INDEX, index);
+  let pathSettings = Convenience.getSettings();
+  let index = global.workspace_manager.get_active_workspace_index();
+  pathSettings.set_int(WORKSPACE_INDEX, index);
 }
 
 function _workspaceNumChanged() {
@@ -72,16 +73,16 @@ let wRemovedSignalId;
 function enable() {
   log("Walkpaper enable");
   _workspaceNumChanged();
-  wSwitchedSignalId[0] = global.screen.connect('workspace-switched', _changeWallpaper);
-  wSwitchedSignalId[1] = global.screen.connect('workspace-switched', _changeIndex);
-  wAddedSignalId = global.screen.connect('workspace-added', _workspaceNumChanged);
-  wRemovedSignalId = global.screen.connect('workspace-removed', _workspaceNumChanged);
+  wSwitchedSignalId[0] = global.workspace_manager.connect('workspace-switched', _changeWallpaper);
+  wSwitchedSignalId[1] = global.workspace_manager.connect('workspace-switched', _changeIndex);
+  wAddedSignalId = global.workspace_manager.connect('workspace-added', _workspaceNumChanged);
+  wRemovedSignalId = global.workspace_manager.connect('workspace-removed', _workspaceNumChanged);
 }
 
 function disable() {
   log("Walkpaper disable");
-  global.screen.disconnect(wSwitchedSignalId[0]);
-  global.screen.disconnect(wSwitchedSignalId[1]);
-  global.screen.disconnect(wAddedSignalId);
-  global.screen.disconnect(wRemovedSignalId);
+  global.workspace_manager.disconnect(wSwitchedSignalId[0]);
+  global.workspace_manager.disconnect(wSwitchedSignalId[1]);
+  global.workspace_manager.disconnect(wAddedSignalId);
+  global.workspace_manager.disconnect(wRemovedSignalId);
 }
