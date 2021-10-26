@@ -17,6 +17,7 @@ const Convenience = Me.imports.convenience;
 const WORKSPACE_COUNT_KEY = 'workspace-count';
 const WORKSPACE_INDEX = 'workspace-index';
 const WALLPAPER_KEY = 'workspace-wallpapers';
+const CURRENT_WALLPAPER_KEY = 'picture-uri';
 
 const WalkpaperModel = new GObject.Class({
     Name: 'Walkpaper.WalkpaperModel',
@@ -105,32 +106,37 @@ const WalkpaperModel = new GObject.Class({
 const WalkpaperSettingsWidget = new GObject.Class({
     Name: 'Walkpaper.WalkpaperSettingsWidget',
     GTypeName: 'WalkpaperSettingsWidget',
-    Extends: Gtk.Grid,
+    Extends: Gtk.Box,
+    Signals: {
+        'change-wallpaper': { param_types: [ GObject.TYPE_STRING] },
+    },
 
     _init: function(params) {
         this.parent(params);
         this.margin = 12;
         this.orientation = Gtk.Orientation.VERTICAL;
+        this.connect('change-wallpaper', this.changeWallpaper)
 
-        let scrolled = new Gtk.ScrolledWindow({ shadow_type: Gtk.ShadowType.IN });
+        let scrolled = new Gtk.ScrolledWindow();
+        //hscroll, vscroll policy
         scrolled.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC);
-        this.add(scrolled);
 
-        this._store = new WalkpaperModel();
+        this.append(scrolled);
 
-        this._treeView = new Gtk.TreeView({ model: this._store,
-                                            headers_visible: false,
-                                            reorderable: true,
-                                            hexpand: true,
-                                            vexpand: true
-                                          });
+        let _store = new WalkpaperModel();
+
+        let _treeView = new Gtk.TreeView({ model: _store,
+                                           headers_visible: true,
+                                           reorderable: true,
+                                           hexpand: true,
+                                           vexpand: true });
 
         //Workspace number
         let columnNumbers = new Gtk.TreeViewColumn({ title: _("Workspace") });
         let rendererNumbers = new Gtk.CellRendererText({ editable: false });
         columnNumbers.pack_start(rendererNumbers, true);
-        columnNumbers.add_attribute(rendererNumbers, 'text', this._store.Columns.NUMBER);
-        this._treeView.append_column(columnNumbers);
+        columnNumbers.add_attribute(rendererNumbers, 'text', _store.Columns.NUMBER);
+        _treeView.append_column(columnNumbers);
 
         //Preview picture
         let columnImages = new Gtk.TreeViewColumn({title: "Preview" });
@@ -138,28 +144,26 @@ const WalkpaperSettingsWidget = new GObject.Class({
         rendererImages.set_fixed_size(240, 120);
         columnImages.pack_start(rendererImages, true);
         columnImages.set_cell_data_func(rendererImages, this.getCellPreviewPixbuf)
-        this._treeView.append_column(columnImages);
+        _treeView.append_column(columnImages);
 
         //Workspace wallpapers paths
         let columnPaths = new Gtk.TreeViewColumn({ title: _("Path to wallpaper") });
         let rendererPaths = new Gtk.CellRendererText({ editable: false });
         columnPaths.pack_start(rendererPaths, true);
-        columnPaths.add_attribute(rendererPaths, 'text', this._store.Columns.PATH);
-        this._treeView.append_column(columnPaths);
+        columnPaths.add_attribute(rendererPaths, 'text', _store.Columns.PATH);
+        _treeView.append_column(columnPaths);
 
-        this._treeView.connect('row-activated', Lang.bind(this, this._editPath));
+        _treeView.connect('row-activated', this._editPath.bind(this));
 
-        scrolled.add(this._treeView);
+        scrolled.set_child(_treeView);
     },
+
     _editPath: function(renderer, path, data) {
         let chooser = new Gtk.FileChooserDialog({
             action: Gtk.FileChooserAction.OPEN,
             select_multiple: false,
-            transient_for: renderer.get_toplevel(),
-            title: 'Select Wallpaper'
-        });
-        //Without setting a current folder folders won't show their content
-        chooser.set_current_folder(GLib.get_home_dir());
+            transient_for: renderer.get_ancestor(Gtk.Window),
+            title: 'Select Wallpaper'});
 
         let filter = new Gtk.FileFilter();
         filter.set_name("Wallpapers");
@@ -172,42 +176,58 @@ const WalkpaperSettingsWidget = new GObject.Class({
         chooser.add_button('Cancel', Gtk.ResponseType.CANCEL);
         chooser.add_button('OK', Gtk.ResponseType.OK);
 
-        let result = chooser.run();
+        chooser.connect('response', this._onEditPath.bind(chooser, path, renderer));
+
+        chooser.show();
+    },
+
+    _onEditPath: function(path, parent, source, result) {
         if (result === Gtk.ResponseType.OK) {
-            let filename = "file://" + chooser.get_filename();
-            let [ok, iter] = this._store.get_iter(path);
+            let file = source.get_file();
+            let filename = "file://" + file.get_path();
+            //We own the file and need to release them after being done
+            file.unref();
+
+            let _store = new WalkpaperModel();
+            let [ok, iter] = _store.get_iter(path);
             if (ok) {
-                this._store.set(iter, [this._store.Columns.PATH], [filename]);
+                _store.set(iter, [_store.Columns.PATH], [filename]);
                 //Check if we changed current wallpaper
                 let _settings = Convenience.getSettings();
                 let index = _settings.get_int(WORKSPACE_INDEX);
-                if (this._store.get_string_from_iter(iter) == '' + index) {
-                  //We change the wallpaper immediately because workspace change
-                  //triggers wallpaper save
-                  this.changeWallpaper(filename);
+                if (_store.get_string_from_iter(iter) == '' + index) {
+                    //We need to change the wallpaper immediately because workspace change
+                    //triggers wallpaper save
+                    parent.get_ancestor(WalkpaperSettingsWidget).emit('change-wallpaper', filename);
                 }
                 //Invalidate thumbnail so it is recreated
-                let thumb_index = parseInt(this._store.get_string_from_iter(iter)) + 1;
-                this._store.Thumbnails[thumb_index] = GdkPixbuf.Pixbuf.new_from_file_at_scale(filename.replace(/file:\/\//, ""), 240, 160, true);
+                let thumb_index = parseInt(_store.get_string_from_iter(iter)) + 1;
+                _store.Thumbnails[thumb_index] = GdkPixbuf.Pixbuf.new_from_file_at_scale(filename.replace(/file:\/\//, ""), 240, 160, true);
             }
         }
-        chooser.destroy()
+
+        source.destroy();
     },
-    changeWallpaper: function(wallpaper) {
-      const BACKGROUND_SCHEMA = 'org.gnome.desktop.background';
-      const CURRENT_WALLPAPER_KEY = 'picture-uri';
-      let backgroundSettings = new Gio.Settings({ schema_id: BACKGROUND_SCHEMA });
-      backgroundSettings.set_string(CURRENT_WALLPAPER_KEY, wallpaper);
+
+    changeWallpaper: function(source, wallpaper) {
+        const BACKGROUND_SCHEMA = 'org.gnome.desktop.background';
+        let backgroundSettings = new Gio.Settings({ schema_id: BACKGROUND_SCHEMA });
+        backgroundSettings.set_string(CURRENT_WALLPAPER_KEY, wallpaper);
     },
+
     getCellPreviewPixbuf: function(col, cell, model, iter, user_data) {
-      let index = model.get_value(iter, [model.Columns.NUMBER]);
+        let index = model.get_value(iter, [model.Columns.NUMBER]);
 
-      if (model.Thumbnails[index] == null) {
-        let path = model.get_value(iter, [model.Columns.PATH]).replace(/file:\/\//, "");
-        model.Thumbnails[index] = GdkPixbuf.Pixbuf.new_from_file_at_scale(path, 240, 160, true);
-      }
+        if (model.Thumbnails[index] == null) {
+            let path = model.get_value(iter, [model.Columns.PATH]).replace(/file:\/\//, "");
+            if (path !== "") {
+                model.Thumbnails[index] = GdkPixbuf.Pixbuf.new_from_file_at_scale(path, 240, 160, true);
+            }
+        }
 
-      cell.set_property('pixbuf', model.Thumbnails[index]);
+        if (model.Thumbnails[index] != null) {
+            cell.set_property('pixbuf', model.Thumbnails[index]);
+        }
     }
 });
 
@@ -217,6 +237,6 @@ function init() {
 
 function buildPrefsWidget() {
     let widget = new WalkpaperSettingsWidget();
-    widget.show_all();
+    widget.show();
     return widget;
 }
