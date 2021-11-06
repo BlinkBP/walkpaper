@@ -16,7 +16,7 @@ const Convenience = Me.imports.convenience;
 
 const WORKSPACE_COUNT_KEY = 'workspace-count';
 const WORKSPACE_INDEX = 'workspace-index';
-const WALLPAPER_KEY = 'workspace-wallpapers';
+const WALLPAPERS_KEY = 'workspace-wallpapers';
 const CURRENT_WALLPAPER_KEY = 'picture-uri';
 
 const WalkpaperModel = new GObject.Class({
@@ -53,7 +53,7 @@ const WalkpaperModel = new GObject.Class({
         this._preventChanges = true;
 
         let workspaceNum = this._settings.get_int(WORKSPACE_COUNT_KEY);
-        let newPaths = this._settings.get_strv(WALLPAPER_KEY);
+        let newPaths = this._settings.get_strv(WALLPAPERS_KEY);
 
         for (let i = newPaths.length; i < workspaceNum; i++) {
             newPaths[i] = '';
@@ -87,7 +87,7 @@ const WalkpaperModel = new GObject.Class({
 
         let index = path.get_indices()[0];
         //let index = this._settings.get_int(WORKSPACE_COUNT_KEY);
-        let paths = this._settings.get_strv(WALLPAPER_KEY);
+        let paths = this._settings.get_strv(WALLPAPERS_KEY);
 
         if (index >= paths.length) {
             // fill with blanks
