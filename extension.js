@@ -2,8 +2,6 @@ const Gio = imports.gi.Gio;
 const Meta = imports.gi.Meta;
 
 const ExtensionUtils = imports.misc.extensionUtils;
-const Me = ExtensionUtils.getCurrentExtension();
-const Convenience = Me.imports.convenience;
 
 const WORKSPACE_COUNT_KEY = 'workspace-count';
 const WORKSPACE_INDEX = 'workspace-index';
@@ -11,7 +9,7 @@ const WALLPAPERS_KEY = 'workspace-wallpapers';
 const BACKGROUND_SCHEMA = 'org.gnome.desktop.background';
 const CURRENT_WALLPAPER_KEY = 'picture-uri';
 
-let _settings = Convenience.getSettings();
+let _settings;
 
 function debugLog(s) {
     //log(s);
@@ -51,13 +49,6 @@ function _changeWallpaper() {
     debugLog("Walkpaper set wallpaper to " + wallpaper);
     backgroundSettings.set_string(CURRENT_WALLPAPER_KEY, wallpaper);
 
-    let workspace = global.workspace_manager.get_workspace_by_index(index);
-    let bg = Meta.Background.new(workspace.get_display());
-    let bg_actor = Meta.BackgroundActor.new(workspace.get_display(), 0);
-
-    global.stage.remove_all_transitions();
-    global.stage.clear_effects();
-
     _changeIndex();
 }
 
@@ -81,8 +72,15 @@ let wRemovedSignalId;
 
 function enable() {
     log("Walkpaper enable");
+
+    //Initialize globals
+    _settings = ExtensionUtils.getSettings();
+
+    //Initialize settings values
     _changeIndex();
     _workspaceNumChanged();
+
+    //Connect signals
     wSwitchedSignalId = global.workspace_manager.connect('workspace-switched', _changeWallpaper);
     wAddedSignalId = global.workspace_manager.connect('workspace-added', _workspaceNumChanged);
     wRemovedSignalId = global.workspace_manager.connect('workspace-removed', _workspaceNumChanged);
@@ -90,6 +88,12 @@ function enable() {
 
 function disable() {
     log("Walkpaper disable");
+
+    //Dispose of globals
+    _settings?.run_dispose();
+    _settings = null;
+
+    //Disconnect signals
     global.workspace_manager.disconnect(wSwitchedSignalId);
     global.workspace_manager.disconnect(wAddedSignalId);
     global.workspace_manager.disconnect(wRemovedSignalId);

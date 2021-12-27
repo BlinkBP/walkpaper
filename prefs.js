@@ -4,15 +4,12 @@ const GObject = imports.gi.GObject;
 const Gtk = imports.gi.Gtk;
 const Gdk = imports.gi.Gdk;
 const GdkPixbuf = imports.gi.GdkPixbuf;
-const Lang = imports.lang;
 
 const Gettext = imports.gettext.domain('gnome-shell-extensions');
 const _ = Gettext.gettext;
 const N_ = function(e) { return e };
 
 const ExtensionUtils = imports.misc.extensionUtils;
-const Me = ExtensionUtils.getCurrentExtension();
-const Convenience = Me.imports.convenience;
 
 const WORKSPACE_COUNT_KEY = 'workspace-count';
 const WORKSPACE_INDEX = 'workspace-index';
@@ -35,7 +32,7 @@ const WalkpaperModel = new GObject.Class({
         this.parent(params);
         this.set_column_types([GObject.TYPE_STRING, GObject.TYPE_STRING]);
 
-        this._settings = Convenience.getSettings();
+        this._settings = ExtensionUtils.getSettings();
 
         let workspaceNum = this._settings.get_int(WORKSPACE_COUNT_KEY);
         for (let i = 0; i < workspaceNum; i++) {
@@ -44,7 +41,7 @@ const WalkpaperModel = new GObject.Class({
 
         this._reloadFromSettings();
 
-        this.connect('row-changed', Lang.bind(this, this._onRowChanged));
+        this.connect('row-changed', this._onRowChanged.bind(this));
     },
 
     _reloadFromSettings: function() {
@@ -193,7 +190,7 @@ const WalkpaperSettingsWidget = new GObject.Class({
             if (ok) {
                 _store.set(iter, [_store.Columns.PATH], [filename]);
                 //Check if we changed current wallpaper
-                let _settings = Convenience.getSettings();
+                let _settings = ExtensionUtils.getSettings();
                 let index = _settings.get_int(WORKSPACE_INDEX);
                 if (_store.get_string_from_iter(iter) == '' + index) {
                     //We need to change the wallpaper immediately because workspace change
@@ -232,7 +229,7 @@ const WalkpaperSettingsWidget = new GObject.Class({
 });
 
 function init() {
-    Convenience.initTranslations();
+    ExtensionUtils.initTranslations();
 }
 
 function buildPrefsWidget() {
