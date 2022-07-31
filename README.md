@@ -2,6 +2,7 @@
 
 ## About:
 Have a different wallpaper on each GNOME workspace.
+
 Compatibility for GNOME 42 (and beyond?)
 
 ## Installation:
