@@ -18,6 +18,11 @@ function debugLog(s) {
 }
 
 function _changeWallpaper() {
+	Mainloop.timeout_add(2000, _changeWallpaper2 );
+}
+
+
+function _changeWallpaper2() {
     debugLog("changeWallpaper");
     
     let colorSettings = new Gio.Settings({ schema_id: INTERFACE_SCHEMA });
