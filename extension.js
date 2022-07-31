@@ -19,7 +19,7 @@ function debugLog(s) {
 }
 
 function _changeWallpaper() {
-	Mainloop.timeout_add(1000, _changeWallpaper2 );
+	Mainloop.timeout_add(500, _changeWallpaper2 );
 }
 
 
