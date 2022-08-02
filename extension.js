@@ -10,24 +10,24 @@ const WALLPAPERS_KEY = 'workspace-wallpapers';
 const BACKGROUND_SCHEMA = 'org.gnome.desktop.background';
 let   CURRENT_WALLPAPER_KEY = 'picture-uri';
 const INTERFACE_SCHEMA = 'org.gnome.desktop.interface';
-const SCHEMA_KEY = 'color-scheme'
+const COLOR_SCHEME_KEY = 'color-scheme'
 
 let   _settings;
 
 function debugLog(s) {
-    log(s);
+    //log(s);
 }
 
 function _changeWallpaper() {
-	Mainloop.timeout_add(500, _changeWallpaper2 );
+	Mainloop.timeout_add(500, _changeWallpaper_delay );
 }
 
 
-function _changeWallpaper2() {
+function _changeWallpaper_delay() {
     debugLog("changeWallpaper");
     
     let colorSettings = new Gio.Settings({ schema_id: INTERFACE_SCHEMA });
-    let scheme = colorSettings.get_string(SCHEMA_KEY);
+    let scheme = colorSettings.get_string(COLOR_SCHEME_KEY);
     if ( scheme == 'prefer-dark' ) {
         CURRENT_WALLPAPER_KEY = 'picture-uri-dark';
     }
