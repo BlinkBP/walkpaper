@@ -1,13 +1,13 @@
 {
- "extension-id": "walkpaper",
- "settings-schema": "org.gnome.shell.extensions.walkpaper",
- "name": "Walkpaper",
- "description": "Set different wallpaper for each workspace by having the wallpaper switch on workspace change.",
+ "extension-id": "walkpaper2",
+ "settings-schema": "org.gnome.shell.extensions.walkpaper2",
+ "name": "Walkpaper2",
+ "description": "Set different wallpaper for each workspace by having the wallpaper switch on workspace change. Forked from the BlinkBP'project (https://github.com/BlinkBP/walkpaper)",
  "shell-version": [
    "42"
   ],
-  "url": "https://github.com/BlinkBP/walkpaper",
-  "uuid": "walkpaper@walkpaper.blinkbp.github.com",
+  "url": "https://github.com/massimiliano-dalcero/walkpaper",
+  "uuid": "walkpaper2@walkpaper.massimiliano-dalcero.github.com",
   "gettext-domain": "english",
   "version": 9
 }

@@ -11,7 +11,7 @@ schemas: org.gnome.shell.extensions.walkpaper.gschema.xml
 	glib-compile-schemas --strict --targetdir=./schemas/ .
 
 walkpaper.zip: schemas $(JS_FILES)
-	zip walkpaper.zip -r $(JS_FILES) metadata.json schemas
+	zip walkpaper2.zip -r $(JS_FILES) metadata.json schemas
 
 clean:
-	rm -rf walkpaper.zip schemas
+	rm -rf walkpaper2.zip schemas
