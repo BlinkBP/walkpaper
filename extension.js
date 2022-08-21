@@ -14,14 +14,29 @@ const INTERFACE_SCHEMA = 'org.gnome.desktop.interface';
 const COLOR_SCHEME_KEY = 'color-scheme'
 
 let   _settings;
+let _changeWallpaperTimeout = null;
 
 function debugLog(s) {
     //log(s);
 }
 
+
 function _changeWallpaper() {
-	GLib.timeout_add(GLib.PRIORITY_HIGH, 500, _changeWallpaper_delay);
+	_changeWallpaperTimeout = GLib.timeout_add(GLib.PRIORITY_HIGH, 500, _changeWallpaper_delay, 
+		function() {
+			_changeWallpaper_delay();
+	        	_changeWallpaperTimeout = null;
+		        return GLib.SOURCE_REMOVE;
+		}
+	)
 	//Mainloop.timeout_add(500, _changeWallpaper_delay );
+}
+
+function disable() {
+    if (_changeWallpaperTimeout) {
+        GLib.Source.remove(_changeWallpaperTimeout);
+        _changeWallpaperTimeout = null;
+    }
 }
 
 
