@@ -1,6 +1,7 @@
 const Gio = imports.gi.Gio;
 const Meta = imports.gi.Meta;
 const Mainloop = imports.mainloop;
+const GLib = imports.gi.GLib;
 
 const ExtensionUtils = imports.misc.extensionUtils;
 
@@ -19,7 +20,8 @@ function debugLog(s) {
 }
 
 function _changeWallpaper() {
-	Mainloop.timeout_add(500, _changeWallpaper_delay );
+	GLib.timeout_add(GLib.PRIORITY_HIGH, 500, _changeWallpaper_delay);
+	//Mainloop.timeout_add(500, _changeWallpaper_delay );
 }
 
 

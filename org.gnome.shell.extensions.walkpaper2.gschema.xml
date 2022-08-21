@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist gettext-domain="gnome-shell-extensions">
+  <schema id="org.gnome.shell.extensions.walkpaper2" path="/org/gnome/shell/extensions/walkpaper2/">
+    <key name="workspace-wallpapers" type="as">
+      <default>[]</default>
+      <summary>Paths to each workspace's wallpaper.</summary>
+      <description>Path to wallpaper which should be set on a corresponding workspace.</description>
+    </key>
+    <key name="workspace-count" type="i">
+      <default>1</default>
+      <summary>Workspace count.</summary>
+      <description>Number of workspaces present.</description>
+    </key>
+    <key name="workspace-index" type="i">
+      <default>0</default>
+      <summary>Current workspace index.</summary>
+      <description></description>
+    </key>
+  </schema>
+</schemalist>

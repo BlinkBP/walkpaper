@@ -5,7 +5,7 @@ const Gtk = imports.gi.Gtk;
 const Gdk = imports.gi.Gdk;
 const GdkPixbuf = imports.gi.GdkPixbuf;
 
-const Gettext = imports.gettext.domain('gnome-shell-extensions');
+const Gettext = imports.gettext.domain('walkpaper2@walkpaper.massimiliano-dalcero.github.com');
 const _ = Gettext.gettext;
 const N_ = function(e) { return e };
 
@@ -21,7 +21,7 @@ const COLOR_SCHEME_KEY = 'color-scheme'
 
 
 const WalkpaperModel = new GObject.Class({
-    Name: 'Walkpaper.WalkpaperModel',
+    Name: 'Walkpaper2.WalkpaperModel',
     GTypeName: 'WalkpaperModel',
     Extends: Gtk.ListStore,
 
@@ -105,7 +105,7 @@ const WalkpaperModel = new GObject.Class({
 });
 
 const WalkpaperSettingsWidget = new GObject.Class({
-    Name: 'Walkpaper.WalkpaperSettingsWidget',
+    Name: 'Walkpaper2.WalkpaperSettingsWidget',
     GTypeName: 'WalkpaperSettingsWidget',
     Extends: Gtk.Box,
     Signals: {
