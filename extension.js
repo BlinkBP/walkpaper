@@ -22,7 +22,7 @@ function debugLog(s) {
 
 
 function _changeWallpaper() {
-	_changeWallpaperTimeout = GLib.timeout_add(GLib.PRIORITY_HIGH, 500, _changeWallpaper_delay, 
+	_changeWallpaperTimeout = GLib.timeout_add(GLib.PRIORITY_HIGH, 500, 
 		function() {
 			_changeWallpaper_delay();
 	        	_changeWallpaperTimeout = null;
