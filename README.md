@@ -1,4 +1,5 @@
-# Walkpaper
+# Walkpaper2
+https://extensions.gnome.org/extension/5267/walkpaper2/
 
 ## About:
 Have a different wallpaper on each GNOME workspace.
