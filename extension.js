@@ -32,13 +32,6 @@ function _changeWallpaper() {
 	//Mainloop.timeout_add(500, _changeWallpaper_delay );
 }
 
-function disable() {
-    if (_changeWallpaperTimeout) {
-        GLib.Source.remove(_changeWallpaperTimeout);
-        _changeWallpaperTimeout = null;
-    }
-}
-
 
 function _changeWallpaper_delay() {
     debugLog("changeWallpaper");
@@ -123,6 +116,11 @@ function enable() {
 
 function disable() {
     log("Walkpaper disable");
+    
+    if (_changeWallpaperTimeout) {
+        GLib.Source.remove(_changeWallpaperTimeout);
+        _changeWallpaperTimeout = null;
+    }
 
     //Dispose of globals
     _settings?.run_dispose();
