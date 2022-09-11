@@ -5,7 +5,7 @@ const Gtk = imports.gi.Gtk;
 const Gdk = imports.gi.Gdk;
 const GdkPixbuf = imports.gi.GdkPixbuf;
 
-const Gettext = imports.gettext.domain('gnome-shell-extensions');
+const Gettext = imports.gettext.domain('walkpaper2@walkpaper.massimiliano-dalcero.github.com');
 const _ = Gettext.gettext;
 const N_ = function(e) { return e };
 
@@ -14,10 +14,14 @@ const ExtensionUtils = imports.misc.extensionUtils;
 const WORKSPACE_COUNT_KEY = 'workspace-count';
 const WORKSPACE_INDEX = 'workspace-index';
 const WALLPAPERS_KEY = 'workspace-wallpapers';
-const CURRENT_WALLPAPER_KEY = 'picture-uri';
+let   CURRENT_WALLPAPER_KEY = 'picture-uri';
+const INTERFACE_SCHEMA = 'org.gnome.desktop.interface';
+const COLOR_SCHEME_KEY = 'color-scheme'
+
+
 
 const WalkpaperModel = new GObject.Class({
-    Name: 'Walkpaper.WalkpaperModel',
+    Name: 'Walkpaper2.WalkpaperModel',
     GTypeName: 'WalkpaperModel',
     Extends: Gtk.ListStore,
 
@@ -94,14 +98,14 @@ const WalkpaperModel = new GObject.Class({
 
         paths[index] = this.get_value(iter, this.Columns.PATH);
 
-        this._settings.set_strv(WALLPAPER_KEY, paths);
+        this._settings.set_strv(WALLPAPERS_KEY, paths);
 
         this._preventChanges = false;
     },
 });
 
 const WalkpaperSettingsWidget = new GObject.Class({
-    Name: 'Walkpaper.WalkpaperSettingsWidget',
+    Name: 'Walkpaper2.WalkpaperSettingsWidget',
     GTypeName: 'WalkpaperSettingsWidget',
     Extends: Gtk.Box,
     Signals: {
@@ -184,6 +188,7 @@ const WalkpaperSettingsWidget = new GObject.Class({
             let filename = "file://" + file.get_path();
             //We own the file and need to release them after being done
             file.unref();
+	    //log(filename)
 
             let _store = new WalkpaperModel();
             let [ok, iter] = _store.get_iter(path);
@@ -207,6 +212,13 @@ const WalkpaperSettingsWidget = new GObject.Class({
     },
 
     changeWallpaper: function(source, wallpaper) {
+        let colorSettings = new Gio.Settings({ schema_id: INTERFACE_SCHEMA });
+        let scheme = colorSettings.get_string(COLOR_SCHEME_KEY);
+	//log("SCHEME:")
+	//log(scheme);
+        if ( scheme == 'prefer-dark' ) {
+           CURRENT_WALLPAPER_KEY = 'picture-uri-dark';
+        }
         const BACKGROUND_SCHEMA = 'org.gnome.desktop.background';
         let backgroundSettings = new Gio.Settings({ schema_id: BACKGROUND_SCHEMA });
         backgroundSettings.set_string(CURRENT_WALLPAPER_KEY, wallpaper);

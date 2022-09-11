@@ -1,5 +1,7 @@
 const Gio = imports.gi.Gio;
 const Meta = imports.gi.Meta;
+const Mainloop = imports.mainloop;
+const GLib = imports.gi.GLib;
 
 const ExtensionUtils = imports.misc.extensionUtils;
 
@@ -7,20 +9,46 @@ const WORKSPACE_COUNT_KEY = 'workspace-count';
 const WORKSPACE_INDEX = 'workspace-index';
 const WALLPAPERS_KEY = 'workspace-wallpapers';
 const BACKGROUND_SCHEMA = 'org.gnome.desktop.background';
-const CURRENT_WALLPAPER_KEY = 'picture-uri';
+let   CURRENT_WALLPAPER_KEY = 'picture-uri';
+const INTERFACE_SCHEMA = 'org.gnome.desktop.interface';
+const COLOR_SCHEME_KEY = 'color-scheme'
 
-let _settings;
+let   _settings;
+let _changeWallpaperTimeout = null;
 
 function debugLog(s) {
     //log(s);
 }
 
+
 function _changeWallpaper() {
+	_changeWallpaperTimeout = GLib.timeout_add(GLib.PRIORITY_HIGH, 500, 
+		function() {
+			_changeWallpaper_delay();
+	        	_changeWallpaperTimeout = null;
+		        return GLib.SOURCE_REMOVE;
+		}
+	)
+	//Mainloop.timeout_add(500, _changeWallpaper_delay );
+}
+
+
+function _changeWallpaper_delay() {
     debugLog("changeWallpaper");
+    
+    let colorSettings = new Gio.Settings({ schema_id: INTERFACE_SCHEMA });
+    let scheme = colorSettings.get_string(COLOR_SCHEME_KEY);
+    if ( scheme == 'prefer-dark' ) {
+        CURRENT_WALLPAPER_KEY = 'picture-uri-dark';
+    }
+
+
     let backgroundSettings = new Gio.Settings({ schema_id: BACKGROUND_SCHEMA });
     let paths = _settings.get_strv(WALLPAPERS_KEY);
     let index = _settings.get_int(WORKSPACE_INDEX);
 
+    debugLog("SCHEME: " + scheme)
+    debugLog("CURRENT_WALLPAPER_KEY: " + CURRENT_WALLPAPER_KEY)
     debugLog("Walkpaper change from WS " + index);
 
     // Save wallpaper for previous WS if changed.
@@ -88,6 +116,11 @@ function enable() {
 
 function disable() {
     log("Walkpaper disable");
+    
+    if (_changeWallpaperTimeout) {
+        GLib.Source.remove(_changeWallpaperTimeout);
+        _changeWallpaperTimeout = null;
+    }
 
     //Dispose of globals
     _settings?.run_dispose();
